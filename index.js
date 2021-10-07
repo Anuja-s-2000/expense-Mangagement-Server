@@ -72,6 +72,21 @@ async function main() {
       })
     })
 
+    app.get('/current_user_detail', async (req, res) => {
+      var user = req.body;
+      /*req format
+      {
+        "userId":"615afeabd20a2cf1a41e37f2"(current logged in user)
+      }*/
+      var data = await getCurrentUserData(client, user.userId);
+      //console.log(youOweDetail)
+      res.status(200).json({
+        success: true,
+        message: 'Current user details',
+        data: data
+      })
+    })
+
     app.put('/update_user',async (req,res) => {
       /*req format
       {
@@ -315,7 +330,12 @@ main().catch(console.error);
 
 async function updateUser(client,info){
   const result = await client.db("expenseSystem").collection("users").updateOne({ _id: ObjectId(info.userId) }, { $set: { name:info.username,email_id:info.email,password:info.password } });
-  console.log(result.modifiedCount);
+  //console.log(result.modifiedCount);
+}
+
+async function getCurrentUserData(client,currentUserId){
+  const result = await client.db("expenseSystem").collection("users").findOne({ _id: ObjectId(currentUserId) });
+  return result;
 }
 
 async function createGroup(client, newGroup) {
