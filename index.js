@@ -25,6 +25,22 @@ async function main() {
       })
     })
 
+    app.get('/all_users',async (req, res) => {
+      var user = req.body;
+      /*req format
+      {
+        "userId":"615afeabd20a2cf1a41e37f2"(current logged in user)
+        
+      }*/
+      var allUsers = await getAllOtherUsers(client,user.userId);
+      //console.log(youOweDetail)
+      res.status(200).json({
+        success: true,
+        message: 'All users list',
+        data: allUsers
+      })
+    })
+
     app.get('/my_groups', async (req, res) => {
       var user = req.body;
       /*req format
@@ -54,6 +70,38 @@ async function main() {
         message: 'selected group users list',
         data: groupUsers
       })
+    })
+
+    app.put('/update_user',async (req,res) => {
+      /*req format
+      {
+        "userId":"615afeabd20a2cf1a41e37f2",(current logged in user)
+        "username":"Test",
+        "email":"test@gmail.com",
+        "password":"test@123"
+      }*/
+      var user=req.body;
+      if(!(await findUserNameExists(client,user.username,user.userId))){
+        if(!(await findUserEmailExists(client,user.email,user.userId))){
+          await updateUser(client,user);
+          res.status(200).json({
+            success: true,
+            message: 'Updated user info'
+          })
+        }
+        else{
+          res.status(500).json({
+            success: false,
+            message: 'User email already exists'
+          })
+        }
+      }
+      else{
+        res.status(500).json({
+          success: false,
+          message: 'User name already exists'
+        })
+      }
     })
 
     app.get('/dashboard_owing_details', async (req, res) => {
@@ -265,6 +313,11 @@ async function main() {
 
 main().catch(console.error);
 
+async function updateUser(client,info){
+  const result = await client.db("expenseSystem").collection("users").updateOne({ _id: ObjectId(info.userId) }, { $set: { name:info.username,email_id:info.email,password:info.password } });
+  console.log(result.modifiedCount);
+}
+
 async function createGroup(client, newGroup) {
   const result = await client.db("expenseSystem").collection("groups").insertOne(newGroup, await updateUsersGroup(client, newGroup.user_ids, newGroup.group_name));
   return result;
@@ -282,6 +335,23 @@ async function findGroupNameExists(client, groupName) {
   return false;
 }
 
+async function findUserNameExists(client, userName,currentUserId) {
+  const result = await client.db("expenseSystem").collection("users").findOne({ _id:{$ne:ObjectId(currentUserId)},name: userName });
+  if (result != (undefined || null)) {
+    return true;
+  }
+  return false;
+}
+
+async function findUserEmailExists(client, userEmail,currentUserId) {
+  const result = await client.db("expenseSystem").collection("users").findOne({ _id:{$ne:ObjectId(currentUserId)},email_id: userEmail });
+  if (result != (undefined || null)) {
+    return true;
+  }
+  return false;
+}
+
+
 async function MyGroupsList(client, userID) {
   const result = (await client.db("expenseSystem").collection("users").findOne({ _id: userID })).groups;
   return result;
@@ -295,6 +365,15 @@ async function getGroupUsersList(client, groupName, currentUserId) {
       groupUserNames.push(await getUserName(client, ObjectId(i)));
   }));
   return groupUserNames;
+}
+async function getAllOtherUsers(client, currentUserId) {
+  const result = await client.db("expenseSystem").collection("users").find({language:"english"});
+  var allUsers = []
+  await result.forEach(i => {
+    if (i._id != currentUserId)
+      allUsers.push(i.name);
+  });
+  return allUsers;
 }
 
 async function getUserId(client, userName) {
