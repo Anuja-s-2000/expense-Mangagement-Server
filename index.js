@@ -105,14 +105,14 @@ async function main() {
           })
         }
         else{
-          res.status(500).json({
+          res.status(200).json({
             success: false,
             message: 'User email already exists'
           })
         }
       }
       else{
-        res.status(500).json({
+        res.status(200).json({
           success: false,
           message: 'User name already exists'
         })
@@ -181,7 +181,7 @@ async function main() {
         })
       }
       else {
-        res.status(500).json({
+        res.status(200).json({
           success: false,
           message: 'Group name already exists'
         })
