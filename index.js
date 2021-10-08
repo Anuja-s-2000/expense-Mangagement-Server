@@ -25,7 +25,7 @@ async function main() {
       })
     })
 
-    app.get('/all_users',async (req, res) => {
+    app.post('/all_users',async (req, res) => {
       var user = req.body;
       /*req format
       {
@@ -41,7 +41,7 @@ async function main() {
       })
     })
 
-    app.get('/my_groups', async (req, res) => {
+    app.post('/my_groups', async (req, res) => {
       var user = req.body;
       /*req format
       {
@@ -56,7 +56,7 @@ async function main() {
       })
     })
 
-    app.get('/group_users', async (req, res) => {
+    app.post('/group_users', async (req, res) => {
       var group = req.body;
       /*req format
       {
@@ -72,7 +72,7 @@ async function main() {
       })
     })
 
-    app.get('/current_user_detail', async (req, res) => {
+    app.post('/current_user_detail', async (req, res) => {
       var user = req.body;
       /*req format
       {
@@ -119,7 +119,7 @@ async function main() {
       }
     })
 
-    app.get('/dashboard_owing_details', async (req, res) => {
+    app.post('/dashboard_owing_details', async (req, res) => {
       await client.connect();
       var user = req.body;
       /*
@@ -291,7 +291,7 @@ async function main() {
       })
     })
 
-    app.get('/get_notification', async (req, res) => {
+    app.post('/get_notification', async (req, res) => {
       var user = req.body;
       /*
       req format
